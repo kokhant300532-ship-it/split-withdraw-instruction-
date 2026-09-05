@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Control Panel - UI Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0f111a;
+      display: flex;
+      min-height: 100vh;
+      color: #e2e8f0;
+      font-family: 'Padauk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* CONTROL PANEL STYLES */
+    .control-panel {
+      width: 400px;
+      background-color: #1a1d2d;
+      color: #e2e8f0;
+      padding: 24px;
+      overflow-y: auto;
+      height: 100vh;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      border-right: 1px solid #2a2e45;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #323854;
+    }
+
+    .panel-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f3c669;
+      letter-spacing: 0.5px;
+    }
+
+    .section-card {
+      background: #212538;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 18px;
+      border: 1px solid #2d334d;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #8da4c4;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .input-group label {
+      font-size: 13px;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    .input-group input[type="text"], 
+    .input-group textarea,
+    .input-group input[type="file"] {
+      background-color: #121420;
+      border: 1px solid #363c5a;
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-group input[type="text"]:focus, 
+    .input-group textarea:focus {
+      border-color: #f3c669;
+      box-shadow: 0 0 0 2px rgba(243, 198, 105, 0.2);
+    }
+
+    .input-group textarea {
+      resize: vertical;
+      height: 75px;
+      line-height: 1.4;
+    }
+
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .input-group input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 40px;
+      height: 36px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .input-group input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .input-group input[type="color"]::-webkit-color-swatch {
+      border: 1px solid #363c5a;
+      border-radius: 6px;
+    }
+
+    .slider-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #121420;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #363c5a;
+    }
+
+    .slider-controls input[type="range"] {
+      flex: 1;
+      cursor: pointer;
+      accent-color: #f3c669;
+    }
+
+    .slider-val {
+      font-size: 13px;
+      width: 50px;
+      text-align: right;
+      color: #f3c669;
+      font-weight: 700;
+    }
+
+    .zoom-btn {
+      background: #2a2e45;
+      color: #fff;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .zoom-btn:hover {
+      background: #f3c669;
+      color: #0f111a;
+    }
+
+    /* PREVIEW AREA STYLES */
+    .preview-area {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      background-color: #0a0b10;
+      overflow: auto;
+    }
+
+    .card-wrapper {
+      transition: transform 0.15s ease-out;
+      transform-origin: center center;
+    }
+
+    .card-container {
+      width: 650px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid #e2e8f0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Header Banner */
+    .header-bar {
+      position: relative;
+      width: 100%;
+      background-color: #0b1e36;
+      line-height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .header-full-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+
+    /* Content Body */
+    .content-body {
+      padding: 24px;
+      color: #1a1a1a;
+    }
+
+    .main-heading {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 14px;
+      color: #000;
+    }
+
+    .description-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .highlight-text {
+      color: #c38b2d;
+      font-weight: bold;
+    }
+
+    /* Steps Section */
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .step-number {
+      background-color: #0d1b2a;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .step-label {
+      font-weight: bold;
+      width: 110px;
+      font-size: 14px;
+    }
+
+    .step-box {
+      background-color: #f7edd4;
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 14px;
+      color: #8c5b11;
+      min-width: 160px;
+    }
+
+    /* Warning Box */
+    .warning-box {
+      border: 1px solid #e0c896;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      background-color: #fffdf7;
+      margin-bottom: 20px;
+    }
+
+    .warning-icon-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 50px;
+    }
+
+    .warning-triangle {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 35px solid #d4af37;
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .warning-triangle::after {
+      content: "!";
+      position: absolute;
+      top: 8px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #000;
+    }
+
+    .warning-text-title {
+      font-weight: bold;
+      font-size: 13px;
+      color: #8c5b11;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .warning-content {
+      font-size: 13px;
+      line-height: 1.45;
+      color: #222;
+    }
+
+    /* ဘောင်အတွင်း ပုံအပြည့်ဝင်၍ နောက်ခံနှင့် တစ်သားတည်းဖြစ်စေသော FOOTER LOGO CONTAINER */
+    .footer-box {
+      width: 100%;
+      height: 85px;
+      background-color: #f8f9fa;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0; /* ဘောင်အပြည့် ဝင်စေရန် padding ကို 0 ထားပါသည် */
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+
+    .footer-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* ပုံကို ဘောင်အတွင်း အပြည့် ကွက်တိဖြည့်ပေးပါသည် */
+      mix-blend-mode: multiply; /* ပုံ၏ အဖြူရောင်နောက်ခံကို ဘောင်၏ အနောက်ခံအရောင်နှင့် ပေါင်းစပ်ပေးပါသည် */
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CONTROL PANEL -->
+  <div class="control-panel">
+    <div class="panel-header">
+      <h2>⚙️ စိတ်ကြိုက် ပြင်ဆင်ချက်များ</h2>
+    </div>
+
+    <!-- Zoom Section -->
+    <div class="section-card">
+      <div class="section-title">🔍 ပုံကြီးချဲ့ / သေးကြည့်ရှုမှု</div>
+      <div class="slider-controls">
+        <button class="zoom-btn" id="btn-zoom-out">-</button>
+        <input type="range" id="zoom-range" min="0.5" max="2" step="0.05" value="1">
+        <button class="zoom-btn" id="btn-zoom-in">+</button>
+        <span class="slider-val" id="zoom-val">100%</span>
+      </div>
+    </div>
+
+    <!-- Header Image Section -->
+    <div class="section-card">
+      <div class="section-title">📌 ခေါင်းစဉ် Banners ဓာတ်ပုံ ပုံစံ</div>
+      <div class="input-group">
+        <label>Header Banner ပုံတင်ရန်</label>
+        <input type="file" id="upload-header-banner" accept="image/*">
+      </div>
+    </div>
+
+    <!-- Time Limit Section -->
+    <div class="section-card">
+      <div class="section-title">⏱️ ကြာချိန် ကန့်သတ်ချက် ပြင်ဆင်ရန်</div>
+      <div class="input-group">
+        <label>ကြာချိန် (ဥပမာ - 20 minutos)</label>
+        <input type="text" id="in-time-limit" value="20 minutos">
+      </div>
+    </div>
+
+    <!-- Content & Amounts Section -->
+    <div class="section-card">
+      <div class="section-title">📝 အကြောင်းအရာ နှင့် ငွေပမာဏများ</div>
+      <div class="input-group">
+        <label>နှုတ်ခွန်းဆက် စာသား</label>
+        <input type="text" id="in-greeting" value="Estimados usuarios, por favor sepan:">
+      </div>
+      <div class="input-group">
+        <label>စမ်းသပ် ထုတ်ယူမည့် ပမာဏ</label>
+        <input type="text" id="in-test-amount" value="350">
+      </div>
+    </div>
+
+    <!-- Withdrawal Steps Section -->
+    <div class="section-card">
+      <div class="section-title">🔢 ငွေထုတ်ယူမှု အဆင့်များ</div>
+      <div class="input-group">
+        <label>အဆင့် (၁) ထုတ်ယူမည့် ပမာဏ</label>
+        <input type="text" id="in-step1" value="350 pesos">
+      </div>
+      <div class="input-group">
+        <label>အဆင့် (၂) ထုတ်ယူမည့် ပမာဏ</label>
+        <input type="text" id="in-step2" value="16,000pesos">
+      </div>
+      <div class="input-group">
+        <label>အဆင့် (၃) ထုတ်ယူမည့် ပမာဏ</label>
+        <input type="text" id="in-step3" value="Retirar el saldo total">
+      </div>
+    </div>
+
+    <!-- Warning Section -->
+    <div class="section-card">
+      <div class="section-title">⚠️ သတိပေးချက် စာသားများ</div>
+      <div class="input-group">
+        <label>သတိပေးချက် အသေးစိတ် စာသား</label>
+        <textarea id="in-warning">Si no realiza los retiros dentro del plazo establecido, su cuenta será puesta bajo control de riesgo. ¡Cualquier retiro posterior será bloqueado! Para desbloquear la cuenta, deberá cabonar el 50% del total de sus fondos. Siga strictly las instrucciones para evitar el bloqueo de riesgo. ¡El canal de retiro se activará inmediatamente después de su apertura!</textarea>
+      </div>
+    </div>
+
+    <!-- Footer Logo Section -->
+    <div class="section-card">
+      <div class="section-title">🖼️ အောက်ခြေ တံဆိပ် (Footer Logo) ပြင်ဆင်ရန်</div>
+      <div class="input-group">
+        <label>Logo ပုံ တင်ရန်</label>
+        <input type="file" id="upload-footer-logo" accept="image/*">
+      </div>
+      <div class="input-group">
+        <label>အောက်ခြေ ဘောင်အမြင့် (Pixels)</label>
+        <div class="slider-controls">
+          <input type="range" id="footer-height-slider" min="50" max="150" value="85">
+          <span class="slider-val" id="footer-height-val">85px</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>အောက်ခြေ ဘောင် အနောက်ခံ အရောင်</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="in-footer-bg" value="#f8f9fa">
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Background Color Section -->
+    <div class="section-card">
+      <div class="section-title">🎨 ကတ်တစ်ခုလုံး အနောက်ခံ အရောင်</div>
+      <div class="input-group">
+        <label>ကတ် နောက်ခံ အရောင် ရွေးချယ်ရန်</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="in-card-bg" value="#ffffff">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW AREA -->
+  <div class="preview-area">
+    <div class="card-wrapper" id="card-wrapper">
+      <div class="card-container" id="card-container">
+        
+        <!-- Header Banner -->
+        <div class="header-bar" id="ui-header-bar">
+          <img id="ui-header-img" class="header-full-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='650' height='100' viewBox='0 0 650 100'><rect width='100%' height='100%' fill='%230b1e36'/><text x='20' y='55' font-family='Arial' font-weight='bold' font-size='14' fill='%23cbb27a'>[ MERCADO LIBRE DEPARTAMENTO DE CONTROL DE RIESGOS ]</text></svg>" alt="Header Banner">
+        </div>
+
+        <!-- Content Body -->
+        <div class="content-body">
+          <div class="main-heading" id="ui-greeting">Estimados usuarios, por favor sepan:</div>
+          <div class="description-text">
+            Debido a su elevado saldo, el Departamento de Finanzas le exige que retire sus fondos en cuotas, de acuerdo con las regulaciones del mercado libre. Primero, retire una cantidad de prueba de <span class="highlight-text"><span id="ui-test-amount">350</span> pesos</span> Si la prueba es exitosa, siga los pasos a continuación en orden. El canal de retiro especial solo estará disponible durante <span class="highlight-text" id="ui-time-limit">20 minutos</span>.
+          </div>
+
+          <!-- Steps -->
+          <div class="steps-container">
+            <div class="step-item">
+              <div class="step-number">1</div>
+              <div class="step-label">Primer retiro:</div>
+              <div class="step-box" id="ui-step1">350 pesos</div>
+            </div>
+            <div class="step-item">
+              <div class="step-number">2</div>
+              <div class="step-label">Segundo retiro:</div>
+              <div class="step-box" id="ui-step2">16,000pesos</div>
+            </div>
+            <div class="step-item">
+              <div class="step-number">3</div>
+              <div class="step-label">Tercer retiro:</div>
+              <div class="step-box" id="ui-step3">Retirar el saldo total</div>
+            </div>
+          </div>
+
+          <!-- Warning Box -->
+          <div class="warning-box">
+            <div class="warning-icon-wrapper">
+              <div class="warning-triangle"></div>
+              <div class="warning-text-title">NOTA</div>
+            </div>
+            <div class="warning-content" id="ui-warning">
+              Si no realiza los retiros dentro del plazo establecido, su cuenta será puesta bajo control de riesgo. <b>¡Cualquier retiro posterior será bloqueado!</b> Para desbloquear la cuenta, deberá cabonar el <b>50%</b> del total de sus fondos. Siga strictly las instrucciones para evitar el bloqueo de riesgo. <b>¡El canal de retiro se activará inmediatamente después de su apertura!</b>
+            </div>
+          </div>
+
+          <!-- FOOTER LOGO CONTAINER -->
+          <div class="footer-box" id="ui-footer-box">
+            <img id="ui-footer-logo" class="footer-logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='650' height='85' viewBox='0 0 650 85'><rect width='100%' height='100%' fill='%23f8f9fa'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='16' fill='%23333333'>Gobierno de México | Hacienda | SAT</text></svg>" alt="Footer Logo">
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Zoom Controls
+    const cardWrapper = document.getElementById('card-wrapper');
+    const zoomRange = document.getElementById('zoom-range');
+    const zoomVal = document.getElementById('zoom-val');
+
+    function updateZoom(value) {
+      const zoom = parseFloat(value).toFixed(2);
+      cardWrapper.style.transform = `scale(${zoom})`;
+      zoomRange.value = zoom;
+      zoomVal.innerText = `${Math.round(zoom * 100)}%`;
+    }
+
+    zoomRange.addEventListener('input', (e) => updateZoom(e.target.value));
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+      let current = parseFloat(zoomRange.value);
+      if (current < 2) updateZoom(current + 0.1);
+    });
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+      let current = parseFloat(zoomRange.value);
+      if (current > 0.5) updateZoom(current - 0.1);
+    });
+
+    // Header Image Upload
+    document.getElementById('upload-header-banner').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => document.getElementById('ui-header-img').src = evt.target.result;
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Time Limit Change Binding
+    document.getElementById('in-time-limit').addEventListener('input', (e) => {
+      document.getElementById('ui-time-limit').innerText = e.target.value;
+    });
+
+    // Inputs Text Binding
+    const bindings = [
+      ['in-greeting', 'ui-greeting'],
+      ['in-test-amount', 'ui-test-amount'],
+      ['in-step1', 'ui-step1'],
+      ['in-step2', 'ui-step2'],
+      ['in-step3', 'ui-step3'],
+      ['in-warning', 'ui-warning']
+    ];
+
+    bindings.forEach(([inId, uiId]) => {
+      document.getElementById(inId).addEventListener('input', (e) => {
+        document.getElementById(uiId).innerText = e.target.value;
+      });
+    });
+
+    // Footer Logo Upload & Dynamic Adjustments
+    const footerLogo = document.getElementById('ui-footer-logo');
+    const footerBox = document.getElementById('ui-footer-box');
+    const footerHeightVal = document.getElementById('footer-height-val');
+
+    document.getElementById('upload-footer-logo').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          footerLogo.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('footer-height-slider').addEventListener('input', (e) => {
+      footerBox.style.height = `${e.target.value}px`;
+      footerHeightVal.innerText = `${e.target.value}px`;
+    });
+
+    document.getElementById('in-footer-bg').addEventListener('input', (e) => {
+      footerBox.style.backgroundColor = e.target.value;
+    });
+
+    document.getElementById('in-card-bg').addEventListener('input', (e) => {
+      document.getElementById('card-container').style.backgroundColor = e.target.value;
+    });
+  </script>
+</body>
+</html>
