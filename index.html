@@ -226,10 +226,41 @@
       border: none;
     }
 
-    /* Content Body */
+    /* Content Body Area */
     .content-body {
       padding: 24px;
       color: #1a1a1a;
+      position: relative;
+    }
+
+    /* Watermark container */
+    .watermark-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .watermark-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.25;
+      display: block;
+      transform: translateY(-80px) scale(1);
+      transition: opacity 0.1s ease, transform 0.1s ease;
+    }
+
+    .content-inner {
+      position: relative;
+      z-index: 1;
     }
 
     .main-heading {
@@ -303,7 +334,7 @@
       padding: 16px;
       display: flex;
       gap: 16px;
-      background-color: #fffdf7;
+      background-color: rgba(255, 253, 247, 0.85);
       margin-bottom: 20px;
     }
 
@@ -349,7 +380,7 @@
       color: #222;
     }
 
-    /* ဘောင်အတွင်း ပုံအပြည့်ဝင်၍ နောက်ခံနှင့် တစ်သားတည်းဖြစ်စေသော FOOTER LOGO CONTAINER */
+    /* FOOTER LOGO CONTAINER */
     .footer-box {
       width: 100%;
       height: 85px;
@@ -362,7 +393,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0; /* ဘောင်အပြည့် ဝင်စေရန် padding ကို 0 ထားပါသည် */
+      padding: 0;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
       transition: all 0.2s ease;
     }
@@ -370,8 +401,8 @@
     .footer-logo-img {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* ပုံကို ဘောင်အတွင်း အပြည့် ကွက်တိဖြည့်ပေးပါသည် */
-      mix-blend-mode: multiply; /* ပုံ၏ အဖြူရောင်နောက်ခံကို ဘောင်၏ အနောက်ခံအရောင်နှင့် ပေါင်းစပ်ပေးပါသည် */
+      object-fit: cover;
+      mix-blend-mode: multiply;
       display: block;
     }
   </style>
@@ -474,6 +505,36 @@
       </div>
     </div>
 
+    <!-- Watermark Section -->
+    <div class="section-card">
+      <div class="section-title">💧 Watermark (ရေစာပုံ) ပြင်ဆင်ရန်</div>
+      <div class="input-group">
+        <label>Watermark ပုံတင်ရန်</label>
+        <input type="file" id="upload-watermark" accept="image/*">
+      </div>
+      <div class="input-group">
+        <label>အပေါ်/အောက် နေရာရွှေ့ရန် (Y-Offset)</label>
+        <div class="slider-controls">
+          <input type="range" id="watermark-y-slider" min="-250" max="250" step="5" value="-80">
+          <span class="slider-val" id="watermark-y-val">-80px</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>အလင်းအမှိန် (Opacity)</label>
+        <div class="slider-controls">
+          <input type="range" id="watermark-opacity-slider" min="0" max="1" step="0.05" value="0.25">
+          <span class="slider-val" id="watermark-opacity-val">25%</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>အကျဉ်းအကျယ် (Size / Scale)</label>
+        <div class="slider-controls">
+          <input type="range" id="watermark-scale-slider" min="0.2" max="2" step="0.05" value="1">
+          <span class="slider-val" id="watermark-scale-val">100%</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Card Background Color Section -->
     <div class="section-card">
       <div class="section-title">🎨 ကတ်တစ်ခုလုံး အနောက်ခံ အရောင်</div>
@@ -496,46 +557,54 @@
           <img id="ui-header-img" class="header-full-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='650' height='100' viewBox='0 0 650 100'><rect width='100%' height='100%' fill='%230b1e36'/><text x='20' y='55' font-family='Arial' font-weight='bold' font-size='14' fill='%23cbb27a'>[ MERCADO LIBRE DEPARTAMENTO DE CONTROL DE RIESGOS ]</text></svg>" alt="Header Banner">
         </div>
 
-        <!-- Content Body -->
+        <!-- Content Body Area (Target Watermark Boundary) -->
         <div class="content-body">
-          <div class="main-heading" id="ui-greeting">Estimados usuarios, por favor sepan:</div>
-          <div class="description-text">
-            Debido a su elevado saldo, el Departamento de Finanzas le exige que retire sus fondos en cuotas, de acuerdo con las regulaciones del mercado libre. Primero, retire una cantidad de prueba de <span class="highlight-text"><span id="ui-test-amount">350</span> pesos</span> Si la prueba es exitosa, siga los pasos a continuación en orden. El canal de retiro especial solo estará disponible durante <span class="highlight-text" id="ui-time-limit">20 minutos</span>.
+          
+          <!-- Watermark Layer -->
+          <div class="watermark-container">
+            <img id="ui-watermark-img" class="watermark-img" src="" alt="Watermark" style="display: none;">
           </div>
 
-          <!-- Steps -->
-          <div class="steps-container">
-            <div class="step-item">
-              <div class="step-number">1</div>
-              <div class="step-label">Primer retiro:</div>
-              <div class="step-box" id="ui-step1">350 pesos</div>
+          <div class="content-inner">
+            <div class="main-heading" id="ui-greeting">Estimados usuarios, por favor sepan:</div>
+            <div class="description-text">
+              Debido a su elevado saldo, el Departamento de Finanzas le exige que retire sus fondos en cuotas, de acuerdo con las regulaciones del mercado libre. Primero, retire una cantidad de prueba de <span class="highlight-text"><span id="ui-test-amount">350</span> pesos</span> Si la prueba es exitosa, siga los pasos a continuación en orden. El canal de retiro especial solo estará disponible durante <span class="highlight-text" id="ui-time-limit">20 minutos</span>.
             </div>
-            <div class="step-item">
-              <div class="step-number">2</div>
-              <div class="step-label">Segundo retiro:</div>
-              <div class="step-box" id="ui-step2">16,000pesos</div>
-            </div>
-            <div class="step-item">
-              <div class="step-number">3</div>
-              <div class="step-label">Tercer retiro:</div>
-              <div class="step-box" id="ui-step3">Retirar el saldo total</div>
-            </div>
-          </div>
 
-          <!-- Warning Box -->
-          <div class="warning-box">
-            <div class="warning-icon-wrapper">
-              <div class="warning-triangle"></div>
-              <div class="warning-text-title">NOTA</div>
+            <!-- Steps -->
+            <div class="steps-container">
+              <div class="step-item">
+                <div class="step-number">1</div>
+                <div class="step-label">Primer retiro:</div>
+                <div class="step-box" id="ui-step1">350 pesos</div>
+              </div>
+              <div class="step-item">
+                <div class="step-number">2</div>
+                <div class="step-label">Segundo retiro:</div>
+                <div class="step-box" id="ui-step2">16,000pesos</div>
+              </div>
+              <div class="step-item">
+                <div class="step-number">3</div>
+                <div class="step-label">Tercer retiro:</div>
+                <div class="step-box" id="ui-step3">Retirar el saldo total</div>
+              </div>
             </div>
-            <div class="warning-content" id="ui-warning">
-              Si no realiza los retiros dentro del plazo establecido, su cuenta será puesta bajo control de riesgo. <b>¡Cualquier retiro posterior será bloqueado!</b> Para desbloquear la cuenta, deberá cabonar el <b>50%</b> del total de sus fondos. Siga strictly las instrucciones para evitar el bloqueo de riesgo. <b>¡El canal de retiro se activará inmediatamente después de su apertura!</b>
-            </div>
-          </div>
 
-          <!-- FOOTER LOGO CONTAINER -->
-          <div class="footer-box" id="ui-footer-box">
-            <img id="ui-footer-logo" class="footer-logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='650' height='85' viewBox='0 0 650 85'><rect width='100%' height='100%' fill='%23f8f9fa'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='16' fill='%23333333'>Gobierno de México | Hacienda | SAT</text></svg>" alt="Footer Logo">
+            <!-- Warning Box -->
+            <div class="warning-box">
+              <div class="warning-icon-wrapper">
+                <div class="warning-triangle"></div>
+                <div class="warning-text-title">NOTA</div>
+              </div>
+              <div class="warning-content" id="ui-warning">
+                Si no realiza los retiros dentro del plazo establecido, su cuenta será puesta bajo control de riesgo. <b>¡Cualquier retiro posterior será bloqueado!</b> Para desbloquear la cuenta, deberá cabonar el <b>50%</b> del total de sus fondos. Siga strictly las instrucciones para evitar el bloqueo de riesgo. <b>¡El canal de retiro se activará inmediatamente después de su apertura!</b>
+              </div>
+            </div>
+
+            <!-- FOOTER LOGO CONTAINER -->
+            <div class="footer-box" id="ui-footer-box">
+              <img id="ui-footer-logo" class="footer-logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='650' height='85' viewBox='0 0 650 85'><rect width='100%' height='100%' fill='%23f8f9fa'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='16' fill='%23333333'>Gobierno de México | Hacienda | SAT</text></svg>" alt="Footer Logo">
+            </div>
           </div>
 
         </div>
@@ -624,6 +693,49 @@
 
     document.getElementById('in-card-bg').addEventListener('input', (e) => {
       document.getElementById('card-container').style.backgroundColor = e.target.value;
+    });
+
+    // Watermark Controls (Y-Offset, Opacity & Scale/Size)
+    const watermarkImg = document.getElementById('ui-watermark-img');
+    const opacitySlider = document.getElementById('watermark-opacity-slider');
+    const opacityVal = document.getElementById('watermark-opacity-val');
+    const scaleSlider = document.getElementById('watermark-scale-slider');
+    const scaleVal = document.getElementById('watermark-scale-val');
+    const ySlider = document.getElementById('watermark-y-slider');
+    const yVal = document.getElementById('watermark-y-val');
+
+    function updateWatermarkTransform() {
+      const y = ySlider.value;
+      const scale = scaleSlider.value;
+      watermarkImg.style.transform = `translateY(${y}px) scale(${scale})`;
+    }
+
+    document.getElementById('upload-watermark').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          watermarkImg.src = evt.target.result;
+          watermarkImg.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    opacitySlider.addEventListener('input', (e) => {
+      const opacity = e.target.value;
+      watermarkImg.style.opacity = opacity;
+      opacityVal.innerText = `${Math.round(opacity * 100)}%`;
+    });
+
+    scaleSlider.addEventListener('input', (e) => {
+      scaleVal.innerText = `${Math.round(e.target.value * 100)}%`;
+      updateWatermarkTransform();
+    });
+
+    ySlider.addEventListener('input', (e) => {
+      yVal.innerText = `${e.target.value}px`;
+      updateWatermarkTransform();
     });
   </script>
 </body>
